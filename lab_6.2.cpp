@@ -35,7 +35,7 @@ void PrintError(Err_lab error_code)
     errors[1] = "There are no objects!";
     errors[2] = "There is no memory left :(";
     ChangeColor(Colors::red);
-    printf("%s\n", errors[int(error_code)]);
+    std::cout <<  errors[int(error_code)] << "\n";
     Sleep(1000);
     system("cls");
 }
@@ -45,49 +45,49 @@ bool CmpAtr(std::string atribute, Object object, char operation)
         if(operation == '='){
             std::string tmp;
             printf("Enter x: ");
-            scanf("%s", &tmp);
+            std::cin >> tmp;
             if(object.name == tmp) return true;
             else return false;
         }
         else {
-            char tmp;
+            char tmpc;
             printf("Enter x: ");
-            scanf("%c", &tmp);
-            if(object.name[0] == tmp) return true;
+            std::cin >> tmpc;
+            if(object.name[0] == tmpc) return true;
             else return false;
         }
     }
     if(atribute == "price")
     {
-        float tmp;
+        float tmpf;
         printf("Enter x: ");
-        scanf("%f", &tmp);
+        scanf("%f", &tmpf);
         switch(operation){
             case '=':
-            if(tmp == object.price) return true;
+            if(tmpf == object.price) return true;
             else return false;
             case '>':
-            if(tmp> object.price) return true;
+            if(tmpf< object.price) return true;
             else return false;
             case '<':
-            if(tmp < object.price) return true;
+            if(tmpf > object.price) return true;
             else return false;
         }
     }
     if(atribute == "quantity")
     {
-        float tmp;
+        float tmpff;
         printf("Enter x: ");
-        scanf("%f", &tmp);
+        scanf("%f", &tmpff);
          switch(operation){
             case '=':
-            if(tmp == object.quantity) return true;
+            if(tmpff == object.quantity) return true;
             else return false;
             case '>':
-            if(tmp> object.quantity) return true;
+            if(tmpff < object.quantity) return true;
             else return false;
             case '<':
-            if(tmp < object.quantity) return true;
+            if(tmpff > object.quantity) return true;
             else return false;
         }
     }
@@ -101,7 +101,7 @@ void ReadObject(Object & item, int number)
     printf("[%d] Enter object's name: ", number);
     std::cin >> item.name;
     printf("[%d] Enter object's price: ", number);
-    std::cin >> item.price;
+     std::cin >> item.price;
     printf("[%d] Enter object's quantity: ", number);
     std::cin >> item.quantity;
     printf("[%d] Enter measurement unit: ", number);
@@ -112,10 +112,10 @@ void PrintObject(Object item, int number)
     ChangeColor(Colors::grey);
     printf("Object number [%d]:\n",number);
     ChangeColor(Colors::white);
-   printf("Name: %s;\t\t", item.name);
-    printf("Price: %f ;\t", item.price);
-    printf("Quantity: %f;\t", item.quantity);
-   printf("Measurement unit: %s;\n", item.unit);
+    std::cout << "Name: " << item.name<< "\t";
+    std::cout << "Price: " << item.price<< "\t";
+    std::cout << "Quantity: " << item.quantity<< "\t";
+    std::cout << "Measurment unit : " << item.unit<< "\n";
 }
 void PrintAuthor()
 {
@@ -133,8 +133,9 @@ void PrintTable(Object *  table_pointer, int  table_size)
         printf("Current shopping list\n");
         for(int i=0;i<table_size;i++){
             PrintObject(table_pointer[i], i+1);
+            sum += table_pointer[i].price*table_pointer[i].quantity;
         }
-        printf("\t\t\t\t\t\tTotal sum is: %f;\n", sum);
+        printf("\t\t\t\t\t\tTotal sum is: %.2f;\n", sum);
         system("Pause");
     }
 }
@@ -150,13 +151,17 @@ void PrintSelected(Object *  table_pointer, int  table_size)
         char operation;
         system("cls");
         ChangeColor(Colors::white);
-        printf("Enter the search [atribute, operation] [ex. price | ]");
+        printf("[Atributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\nEnter the search [Write \"0 0\" to leave] : ");
         fflush(stdin);
-        scanf("%s", &atribute);
-        scanf("%c", &operation);
+        std::cin >> atribute >> operation;
+        if(atribute == "0" || operation == '0') return;
         for(int i =0; i<table_size; i++){
-                if(CmpAtr( atribute ,table_pointer[i], operation)) PrintObject(table_pointer[i], i+1);
+            if(CmpAtr( atribute ,table_pointer[i], operation)) {
+                system("cls");
+                PrintObject(table_pointer[i], i+1);
+            }
         }
+        system("pause");
     }
 }   
 void InitNewTab(Object * & table_pointer, int & table_size)
@@ -166,11 +171,10 @@ void InitNewTab(Object * & table_pointer, int & table_size)
     scanf("%d", &table_size);
     if(table_size == 0) table_pointer = nullptr;
     else {
-        table_pointer= (Object *) malloc(sizeof(Object)*table_size);
+        table_pointer=  new Object[table_size];
         if(table_pointer == nullptr)
             PrintError(Err_lab::mem);
     }
-    
 
     for(int i=0;i<table_size;i++) ReadObject(*(table_pointer +i), i+1);
 }
@@ -185,17 +189,19 @@ void DelTab(Object * & table_pointer, int & table_size)
 }
 void AddObject(Object * & table_pointer, int & table_size)
 {
-    table_size ++;
-    table_pointer= (Object *) realloc(table_pointer ,sizeof(Object)*table_size);
-    if(table_pointer == nullptr);
-        PrintError(Err_lab::mem);
+    Object * tmp_ptr;
+    tmp_ptr =  new Object [++ table_size];
+    if(tmp_ptr == nullptr) PrintError(Err_lab::mem);
+    for(int i=0; i< table_size -1;i++) tmp_ptr[i] = table_pointer[i];
+    table_pointer = tmp_ptr;
+    free(tmp_ptr);
     ReadObject(table_pointer[table_size-1], table_size);
 }
 void DelObjectPos(Object * & table_pointer, int & table_size)
 {
     int pos;
     if(table_pointer == nullptr) {
-        PrintError((Err_lab::wrong_pos));
+        PrintError((Err_lab::no_obj));
         return;
     }
     while(true){
@@ -205,21 +211,22 @@ void DelObjectPos(Object * & table_pointer, int & table_size)
         fflush(stdin);
         scanf("%d", &pos); 
         if(pos == 0) return;
-        if(pos-1>= table_size || pos -1<0)  PrintError(Err_lab::no_obj);
+        if(pos-1>= table_size || pos -1<0)  PrintError(Err_lab::wrong_pos);
         else break;
     }
-    for(int i =pos -1 ; i < table_size ; i++) table_pointer[i] = table_pointer[i+1];
-    free(table_pointer + pos);
+   
     if(table_size == 1) {  
         table_pointer =  nullptr;
         table_size = 0;
     }
     else {
-
-        table_pointer= (Object*)realloc(table_pointer,sizeof(Object)*table_size);
-        if(table_pointer == nullptr);
-            PrintError(Err_lab::mem);
-        table_size --;
+        Object * tmp_ptr;
+        tmp_ptr = new Object [-- table_size];
+        if(tmp_ptr == nullptr) PrintError(Err_lab::mem);
+        for(int i = 0; i< pos -1; i++ ) tmp_ptr[i] = table_pointer[i];
+        for(int i = pos -1; i< table_size; i++) tmp_ptr[i] = table_pointer[i+1];
+        table_pointer = tmp_ptr;
+        free(tmp_ptr);
     }
 }
 void Menu( Object* &arg_1, int &arg_2)
