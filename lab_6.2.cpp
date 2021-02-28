@@ -8,7 +8,7 @@
 #include <thread>
 #include <chrono>
 #include <map>
-
+namespace lab6 {
 struct Object{
     std::string name;
     float price;
@@ -299,4 +299,6 @@ int main()
     int tableSize=0;
     while(true) Menu(table, tableSize);
     return 0;
+}
+
 }
