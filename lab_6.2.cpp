@@ -17,12 +17,12 @@ struct Object{
     float quantity;
     std::string unit ;
 };
-enum class Colors{
-    white = 7,
-    red  =12,
-    yellow =14,
-    grey = 8,
-    green = 11,
+enum class ColLab{
+    white,
+    red,
+    yellow,
+    grey,
+    kblue,
 };
 enum class ErrLab{
     noMem,
@@ -30,14 +30,15 @@ enum class ErrLab{
     wrongPos,
 };
 
-inline void ChangeColor(Colors color)
+inline void ChangeColor(ColLab colorName)
 {
-    SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE), static_cast<int>(color));
+    std::map <ColLab, int> Colors {{ColLab::white,7},{ColLab::grey, 8},{ColLab::kblue, 11},{ColLab::red, 12},{ColLab::yellow, 14},{ColLab::kblue, 11}};
+    SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE), Colors[colorName]);
 }
 void PrintError(ErrLab errorName)
 {
     std::map <ErrLab, std::string> Errors {{ErrLab::wrongPos,"Wrong number!"},{ErrLab::noObj,"There are no objects!"},{ErrLab::noMem,"There is no memory left :("}};
-    ChangeColor(Colors::red);
+    ChangeColor(ColLab::red);
     std::cout << Errors[errorName] << "\n";
     std::this_thread::sleep_for (std::chrono::seconds(1));
     system("cls");
@@ -98,9 +99,9 @@ bool CmpAtr(std::string atribute, Object object, char operation)
 }
 void ReadObject(Object & item, int number)
 {
-    ChangeColor(Colors::green);
+    ChangeColor(ColLab::kblue);
     printf("You are currently entering data for object number [%d]:\n", number);
-    ChangeColor(Colors::yellow);
+    ChangeColor(ColLab::yellow);
     printf("[%d] Enter object's name: ", number);
     std::cin >> item.name;
     printf("[%d] Enter object's price: ", number);
@@ -112,9 +113,9 @@ void ReadObject(Object & item, int number)
 }
 void PrintObject(Object item, int number)
 {
-    ChangeColor(Colors::grey);
+    ChangeColor(ColLab::grey);
     printf("Object number [%d]:\n",number);
-    ChangeColor(Colors::white);
+    ChangeColor(ColLab::white);
     std::cout << "Name: " << item.name<< "\t";
     std::cout << "Price: " << item.price<< "\t";
     std::cout << "Quantity: " << item.quantity<< "\t";
@@ -122,17 +123,17 @@ void PrintObject(Object item, int number)
 }
 void PrintAuthor()
 {
-    ChangeColor(Colors::white);
+    ChangeColor(ColLab::white);
     system("cls");
     std::cout << "Author: Kacper Aleks (CZ/NP 12:15) \n\n" ;
 }
 void PrintTable(Object *  tablePointer, int  tableSize)
 {
-    ChangeColor(Colors::red);
+    ChangeColor(ColLab::red);
     if(tablePointer == nullptr) PrintError(ErrLab::noObj);
     else{
         float sum=0;
-        ChangeColor(Colors::green);
+        ChangeColor(ColLab::kblue);
         printf("Current shopping list\n");
         for(int i=0;i<tableSize;i++){
             PrintObject(tablePointer[i], i+1);
@@ -153,7 +154,7 @@ void PrintSelected(Object *  tablePointer, int  tableSize)
         std::string atribute;
         char operation;
         system("cls");
-        ChangeColor(Colors::white);
+        ChangeColor(ColLab::white);
         printf("[Atributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\nEnter the search [Write \"0 0\" to leave] : ");
         fflush(stdin);
         std::cin >> atribute >> operation;
@@ -169,7 +170,7 @@ void PrintSelected(Object *  tablePointer, int  tableSize)
 }   
 void InitNewTab(Object * & tablePointer, int & tableSize)
 {
-    ChangeColor(Colors::yellow);
+    ChangeColor(ColLab::yellow);
     printf("Enter the table size: ");
     scanf("%d", &tableSize);
     if(tableSize == 0) tablePointer = nullptr;
@@ -209,7 +210,7 @@ void DelObjectPos(Object * & tablePointer, int & tableSize)
     }
     while(true){
         PrintTable(tablePointer,tableSize);
-        ChangeColor(Colors::yellow);
+        ChangeColor(ColLab::yellow);
         printf("\nWhat position should be deleted? [wpisz \'0\' aby wyjsc]: ");
         fflush(stdin);
         scanf("%d", &pos); 
@@ -237,9 +238,9 @@ void Menu( Object* &arg1, int &arg2)
     PrintAuthor();
     printf("Adress of the table's first element: %d\nCurrent size of table: %d\n", arg1, arg2);
     printf("\n\n");
-    ChangeColor(Colors::green);
+    ChangeColor(ColLab::kblue);
     printf("Welcome to the program that immitates a paper shoppping list!\n");
-    ChangeColor(Colors::yellow);
+    ChangeColor(ColLab::yellow);
     printf("[1] Create new table\n[2] Delete table\n[3] Add one object \n[4] Delete object at certain position\n[5] Print table \n[6] Print selected objects\nExit [K]\n");
     fflush(stdin);
     char c=getch();
