@@ -8,7 +8,9 @@
 #include <thread>
 #include <chrono>
 #include <map>
-namespace lab6 {
+
+namespace Lab6 {
+
 struct Object{
     std::string name;
     float price;
@@ -37,7 +39,7 @@ void PrintError(ErrLab errorName)
     std::map <ErrLab, std::string> Errors {{ErrLab::wrongPos,"Wrong number!"},{ErrLab::noObj,"There are no objects!"},{ErrLab::noMem,"There is no memory left :("}};
     ChangeColor(Colors::red);
     std::cout << Errors[errorName] << "\n";
-    std::this_thread::sleep_for(2000);
+    std::this_thread::sleep_for (std::chrono::seconds(1));
     system("cls");
 }
 bool CmpAtr(std::string atribute, Object object, char operation)
@@ -284,21 +286,22 @@ void Menu( Object* &arg1, int &arg2)
     }
     
 }
+}
 
-int main()
-{
+
+int main() {
     /*
         Autor:  Kacper Aleks
         Grupa:  CZ/NP 12:15     (Czwartek nieparzysty godz 12:15)
         Temat:  program - lab 6
         Data ostatniej modyfikacji  14.01.21 12.55
     */
-
-    Object * table;
+    Lab6::Object * table;
     table = nullptr;
     int tableSize=0;
-    while(true) Menu(table, tableSize);
+    while(true) {
+        Lab6::Menu(table, tableSize);
+        break;
+    }
     return 0;
-}
-
 }
