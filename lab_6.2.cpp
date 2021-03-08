@@ -1,7 +1,7 @@
 
 #include <cstdio>
 #include <iostream>
-#include <cstring>
+#include <string>
 #include <conio.h>
 #include <windows.h>
 #include <cstdlib>
@@ -23,16 +23,24 @@ enum class ColLab{
     yellow,
     grey,
     kblue,
+    purple
 };
 enum class ErrLab{
     noMem,
     noObj,
     wrongPos,
 };
+enum class Operation{
+    bigger,
+    lower,
+    equal,
+    startingWith,
+    null
+};
 
 inline void ChangeColor(ColLab colorName)
 {
-    std::map <ColLab, int> Colors {{ColLab::white,7},{ColLab::grey, 8},{ColLab::kblue, 11},{ColLab::red, 12},{ColLab::yellow, 14},{ColLab::kblue, 11}};
+    std::map <ColLab, int> Colors {{ColLab::white,7},{ColLab::grey, 8},{ColLab::kblue, 11},{ColLab::red, 12},{ColLab::yellow, 14},{ColLab::kblue, 11},{ColLab::purple, 9}};
     SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE), Colors[colorName]);
 }
 void PrintError(ErrLab errorName)
@@ -43,59 +51,56 @@ void PrintError(ErrLab errorName)
     std::this_thread::sleep_for (std::chrono::seconds(1));
     system("cls");
 }
-bool CmpAtr(std::string atribute, Object object, char operation)
+Operation ConvertOperation(char c)
 {
-    if(atribute == "name" ){
-        if(operation == '='){
-            std::string tmp;
-            std::cout << "Enter x: ";
-            std::cin >> tmp;
-            if(object.name == tmp) return true;
-            else return false;
-        }
-        else {
+    switch(c){
+        case '=':
+        return Operation::equal;
+        case '>':
+        return Operation::bigger;
+        case '<':
+        return Operation::lower;
+        case '|':
+        return Operation::startingWith;
+        default:
+        return Operation::null;
+    };
+}
+bool CmpNameAttr(Object object, Operation op)
+{
+    std::string tmp;
+    if(op == Operation::equal){
+        std::string tmp;
+        std::cout << "Enter wanted name: ";
+        std::cin >> tmp;
+        if(object.name == tmp) return true;
+        else return false;
+    }
+    else {
             char tmpC;
-            std::cout << "Enter x: ";
+            std::cout << "Enter wanted letter: ";
             std::cin >> tmpC;
             if(object.name[0] == tmpC) return true;
             else return false;
-        }
     }
-    if(atribute == "price")
-    {
-        float tmpF;
-        std::cout << "Enter x: ";
-        std::cin >> tmpF;
-        switch(operation){
-            case '=':
-            if(tmpF == object.price) return true;
-            else return false;
-            case '>':
-            if(tmpF< object.price) return true;
-            else return false;
-            case '<':
-            if(tmpF > object.price) return true;
-            else return false;
-        }
+}
+template <typename Member> bool CmpGenericAttr(Member m ,Operation op)
+{
+    float tmp;
+    std::cout << "Enter reference number: ";
+    std::cin >> tmp;
+    if(op == Operation::equal) {
+        if(tmp == m) return true;
+        else return false;
     }
-    if(atribute == "quantity")
-    {
-        float tmpFF;
-        std::cout << "Enter x: ";
-        std::cin >> tmpFF;
-         switch(operation){
-            case '=':
-            if(tmpFF == object.quantity) return true;
-            else return false;
-            case '>':
-            if(tmpFF < object.quantity) return true;
-            else return false;
-            case '<':
-            if(tmpFF > object.quantity) return true;
-            else return false;
-        }
+    if(op == Operation::bigger) {
+        if(tmp < m) return true;
+        else return false;
     }
-    return false;
+    else {
+        if(tmp > m) return true;
+        else return false;
+    }
 }
 void ReadObject(Object & item, int number)
 {
@@ -113,13 +118,24 @@ void ReadObject(Object & item, int number)
 }
 void PrintObject(Object item, int number)
 {
-    ChangeColor(ColLab::grey);
+    ChangeColor(ColLab::kblue);
     printf("Object number [%d]:\n",number);
-    ChangeColor(ColLab::white);
-    std::cout << "Name: " << item.name<< "\t";
-    std::cout << "Price: " << item.price<< "\t";
-    std::cout << "Quantity: " << item.quantity<< "\t";
-    std::cout << "Measurment unit : " << item.unit<< "\n";
+    ChangeColor(ColLab::purple);
+    std::cout << "Name: ";
+    ChangeColor(ColLab::yellow);
+    std::cout<< item.name<< "\t";
+    ChangeColor(ColLab::purple);
+    std::cout << "Price: ";
+    ChangeColor(ColLab::yellow);
+    std::cout << item.price<< "\t";
+    ChangeColor(ColLab::purple);
+    std::cout << "Quantity: "; 
+    ChangeColor(ColLab::yellow);
+    std::cout << item.quantity<< "\t";
+    ChangeColor(ColLab::purple);
+    std::cout << "Measurment unit: "; 
+    ChangeColor(ColLab::yellow);
+    std::cout << item.unit<< "\n\n";
 }
 void PrintAuthor()
 {
@@ -134,12 +150,12 @@ void PrintTable(Object *  tablePointer, int  tableSize)
     else{
         float sum=0;
         ChangeColor(ColLab::kblue);
-        printf("Current shopping list\n");
+        printf("Current shopping list\n\n\n");
         for(int i=0;i<tableSize;i++){
             PrintObject(tablePointer[i], i+1);
             sum += tablePointer[i].price*tablePointer[i].quantity;
         }
-        printf("\t\t\t\t\t\tTotal sum is: %.2f;\n", sum);
+        printf("Total sum is: %.2f;\n\n", sum);
         system("Pause");
     }
 }
@@ -151,18 +167,35 @@ void PrintSelected(Object *  tablePointer, int  tableSize)
     }
     printf("Welcome to the condition printing creator!\n\n");
     while(true){
-        std::string atribute;
-        char operation;
+        std::string attribute;
+        char c;
         system("cls");
+        ChangeColor(ColLab::kblue);
+        std::cout << "[Atributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\n\n";
         ChangeColor(ColLab::white);
-        printf("[Atributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\nEnter the search [Write \"0 0\" to leave] : ");
+        std::cout << "Enter the search [Write \"0 0\" to leave] : ";
         fflush(stdin);
-        std::cin >> atribute >> operation;
-        if(atribute == "0" || operation == '0') return;
+        std::cin >> attribute >> c;
+        Operation op = ConvertOperation(c);
+        if(attribute == "0" || c == '0') return;
         for(int i =0; i<tableSize; i++){
-            if(CmpAtr( atribute ,tablePointer[i], operation)) {
-                system("cls");
-                PrintObject(tablePointer[i], i+1);
+            if(attribute == "name"){
+                if(CmpNameAttr(tablePointer[i], op)) {
+                    system("cls");
+                    PrintObject(tablePointer[i], i+1);
+                }
+            }
+            if(attribute == "price") {
+                if( CmpGenericAttr <float> (tablePointer[i].price ,op)) {
+                    system("cls");
+                    PrintObject(tablePointer[i], i+1);
+                }
+            }
+            if(attribute == "quantity") {
+                if(CmpGenericAttr <float> (tablePointer[i].quantity ,op)) {
+                    system("cls");
+                    PrintObject(tablePointer[i], i+1);
+                }
             }
         }
         system("pause");
@@ -233,7 +266,7 @@ void DelObjectPos(Object * & tablePointer, int & tableSize)
         free(tmpPtr);
     }
 }
-void Menu( Object* &arg1, int &arg2)
+int Menu( Object* &arg1, int &arg2)
 {
     PrintAuthor();
     printf("Adress of the table's first element: %d\nCurrent size of table: %d\n", arg1, arg2);
@@ -277,20 +310,20 @@ void Menu( Object* &arg1, int &arg2)
         break;
 
         case 'k':
-        return ;
+        return 0;
 
         case 'K':
-        return ;
+        return  0;
 
         default:
         PrintError(ErrLab::wrongPos);
     }
-    
-}
+    return 1;
 }
 
+}
 
-int main() {
+int main(){
     /*
         Autor:  Kacper Aleks
         Grupa:  CZ/NP 12:15     (Czwartek nieparzysty godz 12:15)
@@ -300,9 +333,6 @@ int main() {
     Lab6::Object * table;
     table = nullptr;
     int tableSize=0;
-    while(true) {
-        Lab6::Menu(table, tableSize);
-        break;
-    }
+    while(Lab6::Menu(table, tableSize));
     return 0;
 }
