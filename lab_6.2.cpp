@@ -13,7 +13,7 @@ namespace Lab6 {
 
 struct Object{
     std::string name;
-    float price;
+    double price;
     float quantity;
     std::string unit ;
 };
@@ -86,7 +86,7 @@ bool CmpNameAttr(Object object, Operation op)
 }
 template <typename Member> bool CmpGenericAttr(Member m ,Operation op)
 {
-    float tmp;
+    Member tmp;
     std::cout << "Enter reference number: ";
     std::cin >> tmp;
     if(op == Operation::equal) {
