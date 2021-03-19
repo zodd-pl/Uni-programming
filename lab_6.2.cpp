@@ -1,10 +1,8 @@
-
 #include <cstdio>
 #include <iostream>
 #include <string>
 #include <conio.h>
 #include <windows.h>
-#include <cstdlib>
 #include <thread>
 #include <chrono>
 #include <map>
@@ -18,9 +16,9 @@ class Object{
     double price;
     float quantity;
     std::string unit ;
-    double TotalSum();
+    double Sum();
 };
-double Object::TotalSum()
+double Object::Sum()
 {
     return price*quantity;
 }
@@ -29,7 +27,7 @@ enum class ColLab{
     red,
     yellow,
     grey,
-    kblue,
+    cyan,
     purple
 };
 enum class ErrLab{
@@ -55,7 +53,7 @@ inline int toGenPosition(int position)
 }
 inline void ChangeColor(ColLab colorName)
 {
-    const std::map <ColLab, int> Colors {{ColLab::white,7},{ColLab::grey, 8},{ColLab::kblue, 11},{ColLab::red, 12},{ColLab::yellow, 14},{ColLab::kblue, 11},{ColLab::purple, 9}};
+    const std::map <ColLab, int> Colors {{ColLab::white,7},{ColLab::grey, 8},{ColLab::purple, 9},{ColLab::cyan, 11},{ColLab::red, 12},{ColLab::yellow, 14}};
     SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE), Colors.at(colorName) );
 }
 void PrintAuthor()
@@ -84,12 +82,12 @@ Operation ConvertOperation(char c)
         case '|':
         return Operation::startingWith;
         default:
-        return Operation::null;
-    };
+        break;
+    }
+    return Operation::null;
 }
 bool CmpNameAttr(Object object, Operation op)
 {
-    std::string tmp;
     if(op == Operation::equal){
         std::string tmp;
         std::cout << "Enter wanted name: ";
@@ -98,11 +96,11 @@ bool CmpNameAttr(Object object, Operation op)
         else return false;
     }
     else {
-            char tmpC;
-            std::cout << "Enter wanted letter: ";
-            std::cin >> tmpC;
-            if(object.name[0] == tmpC) return true;
-            else return false;
+        char tmpC;
+        std::cout << "Enter wanted letter: ";
+        std::cin >> tmpC;
+        if(object.name[0] == tmpC) return true;
+        else return false;
     }
 }
 template <typename Member> bool CmpGenericAttr(Member m ,Operation op)
@@ -126,7 +124,7 @@ template <typename Member> bool CmpGenericAttr(Member m ,Operation op)
 Lab6::Object ReadObject(Object & item, int number)
 {
     fflush(stdin);
-    ChangeColor(ColLab::kblue);
+    ChangeColor(ColLab::cyan);
     printf("You are currently entering data for object number [%d]:\n", number);
     ChangeColor(ColLab::yellow);
     printf("[%d] Enter object's name: ", number);
@@ -141,7 +139,7 @@ Lab6::Object ReadObject(Object & item, int number)
 }
 void PrintObject(Object item, int number)
 {
-    ChangeColor(ColLab::kblue);
+    ChangeColor(ColLab::cyan);
     printf("Object number [%d]:\n",number);
     ChangeColor(ColLab::purple);
     std::cout << "Name: ";
@@ -152,32 +150,34 @@ void PrintObject(Object item, int number)
     ChangeColor(ColLab::yellow);
     std::cout << item.price<< "\t";
     ChangeColor(ColLab::purple);
-    std::cout << "Quantity: "; 
+    std::cout << "Quantity: ";
     ChangeColor(ColLab::yellow);
     std::cout << item.quantity<< "\t";
     ChangeColor(ColLab::purple);
-    std::cout << "Measurment unit: "; 
+    std::cout << "Measurement unit: ";
     ChangeColor(ColLab::yellow);
     std::cout << item.unit<< "\n\n";
 }
-void PrintTable(std::vector <Lab6::Object> table, int  tableSize)
+void PrintTable(std::vector <Lab6::Object> table)
 {
+    int tableSize= table.size();
     ChangeColor(ColLab::red);
     if(tableSize == 0) PrintError(ErrLab::noObj);
     else{
-        float sum=0;
-        ChangeColor(ColLab::kblue);
+        float totalSum=0;
+        ChangeColor(ColLab::cyan);
         printf("Current shopping list\n\n\n");
         for(int i=0;i<tableSize;i++){
             PrintObject(table.at(i), toGuiPosition(i));
-            sum += table.at(i).TotalSum();
+            totalSum += table.at(i).Sum();
         }
-        printf("Total sum is: %.2f;\n\n", sum);
+        printf("Total sum is: %.2f;\n\n", totalSum);
         system("Pause");
     }
 }
-void PrintSelected(std::vector <Lab6::Object> table, int  tableSize)
+void PrintSelected(std::vector <Lab6::Object> table)
 {
+    int tableSize= table.size();
     if(tableSize == 0 ) {
         PrintError(ErrLab::noObj);
         return;
@@ -187,8 +187,8 @@ void PrintSelected(std::vector <Lab6::Object> table, int  tableSize)
         std::string attribute;
         char c;
         system("cls");
-        ChangeColor(ColLab::kblue);
-        std::cout << "[Atributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\n\n";
+        ChangeColor(ColLab::cyan);
+        std::cout << "[Attributes => price; name; quantity]\n[Operations => = ; > ; < ; |]\n\n";
         ChangeColor(ColLab::white);
         std::cout << "Enter the search [Write \"0 0\" to leave] : ";
         fflush(stdin);
@@ -217,45 +217,49 @@ void PrintSelected(std::vector <Lab6::Object> table, int  tableSize)
         }
         system("pause");
     }
-}   
-void InitNewTab(std::vector <Lab6::Object> & table, int & tableSize)
+}
+void InitNewTab(std::vector <Lab6::Object> & table)
 {
+    int tableSize= table.size();
     ChangeColor(ColLab::yellow);
     printf("Enter the table size: ");
-    scanf("%d", &tableSize);
+    std::cin >> tableSize;
     if(tableSize == 0);
     else table.resize(tableSize);
     for(int i=0;i<tableSize;i++) ReadObject(table.at(i), toGuiPosition(i));
 }
-void DelTab(std::vector <Lab6::Object> & table, int & tableSize)
+void DelTab(std::vector <Lab6::Object> & table)
 {
+    int tableSize= table.size();
     if(tableSize != 0) table.resize(0);
     else  PrintError(ErrLab::noObj);
 }
-void AddObject(std::vector <Lab6::Object> & table, int & tableSize)
+void AddObject(std::vector <Lab6::Object> & table)
 {
+    int tableSize= table.size();
     table.resize(++tableSize);
     ReadObject(table.at(tableSize-1), tableSize);
 }
-void DelObjectPos(std::vector <Lab6::Object> & table, int & tableSize)
+void DelObjectPos(std::vector <Lab6::Object> & table)
 {
+    int tableSize= table.size();
     int pos;
-    if(table.size() == 0) {
+    if(table.empty()) {
         PrintError((ErrLab::noObj));
         return;
     }
     while(true){
-        PrintTable(table,tableSize);
+        PrintTable(table);
         ChangeColor(ColLab::yellow);
-        printf("\nWhat position should be deleted? [wpisz \'0\' aby wyjsc]: ");
+        printf("\nWhat position should be deleted? [Enter \'0\' to leave]: ");
         fflush(stdin);
-        scanf("%d", &pos); 
+        std::cin >> pos;
         if(pos == 0) return;
         pos= toGenPosition(pos);
         if(pos >= tableSize || pos < 0)  PrintError(ErrLab::wrongPos);
         else break;
     }
-   
+
     if(tableSize == 1) table.resize(0);
     else {
         for(int i = pos -1; i< tableSize; i++) table.at(i) = table.at(i+1);
@@ -264,12 +268,11 @@ void DelObjectPos(std::vector <Lab6::Object> & table, int & tableSize)
 }
 int Menu(std::vector <Lab6::Object> & arg1)
 {
-    int tableSize = arg1.size();
     PrintAuthor();
-    printf("Adress of the table's first element: %d\nCurrent size of table: %d\n", arg1, tableSize );
+    std::cout << "Address of the table's first element: " << &arg1 << "\nCurrent size of table: " << arg1.size() << "\n";
     printf("\n\n");
-    ChangeColor(ColLab::kblue);
-    printf("Welcome to the program that immitates a paper shoppping list!\n");
+    ChangeColor(ColLab::cyan);
+    printf("Welcome to the program that imitates a paper shopping list!\n");
     ChangeColor(ColLab::yellow);
     printf("[1] Create new table\n[2] Delete table\n[3] Add one object \n[4] Delete object at certain position\n[5] Print table \n[6] Print selected objects\nExit [K]\n");
     fflush(stdin);
@@ -277,32 +280,32 @@ int Menu(std::vector <Lab6::Object> & arg1)
     switch(c){
         case '1':
         system("cls");
-        InitNewTab(arg1,tableSize);
+        InitNewTab(arg1);
         break;
 
         case '2':
         system("cls");
-        DelTab(arg1,tableSize);
+        DelTab(arg1);
         break;
 
         case '3':
         system("cls");
-        AddObject(arg1,tableSize);
+        AddObject(arg1);
         break;
 
         case '4':
         system("cls");
-        DelObjectPos(arg1,tableSize);
+        DelObjectPos(arg1);
         break;
 
         case '5':
         system("cls");
-        PrintTable(arg1, tableSize);
+        PrintTable(arg1);
         break;
 
         case '6':
         system("cls");
-        PrintSelected(arg1,tableSize);
+        PrintSelected(arg1);
         system("Pause");
         break;
 
@@ -320,14 +323,8 @@ int Menu(std::vector <Lab6::Object> & arg1)
 
 }
 
-int main(){
-    /*
-        Autor:  Kacper Aleks
-        Grupa:  CZ/NP 12:15     (Czwartek nieparzysty godz 12:15)
-        Temat:  program - lab 6
-        Data ostatniej modyfikacji  14.01.21 12.55
-    */
-    std::vector <Lab6::Object> table;
-    while(Lab6::Menu(table));
+int main() {
+    std::vector<Lab6::Object> table;
+    while (Lab6::Menu(table));
     return 0;
 }
